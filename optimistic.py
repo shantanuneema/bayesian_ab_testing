@@ -1,0 +1,56 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+NUM_TRIALS = 10000
+EPS = 0.1 # epsilon
+BANDIT_PROBS = [0.2, 0.5, 0.75] # win rates for bandits
+
+class Bandit:
+    
+    def __init__(self, p):
+        self.p = p
+        self.p_estimate = 10.
+        self.N = 1. # Number of samples
+        
+    def pull(self):
+        return np.random.random() < self.p
+    
+    def update(self, x):
+        self.N += 1
+        self.p_estimate = ((self.N - 1)*self.p_estimate + x)/self.N
+        
+def experiment():
+    bandits = [Bandit(p) for p in BANDIT_PROBS]
+    rewards = np.zeros(NUM_TRIALS)
+
+    for i in range(NUM_TRIALS):
+
+        # use epsilon-greedy to select next bandit
+        j = np.argmax([b.p_estimate for b in bandits])
+
+        # pull the arm for the bandit with largest sample
+        x = bandits[j].pull()
+
+        # update the rewards log
+        rewards[i] = x
+
+        # update the distribution for the bandit whose arm we just pulled
+        bandits[j].update(x)
+
+    for b in bandits:
+        print("mean estimate:", b.p_estimate)
+
+    print("total reward earned", rewards.sum())
+    print("overall win rate", rewards.sum()/NUM_TRIALS)
+    print("number of times selected each bandit", [b.N for b in bandits])
+
+    cummulative_rewards = np.cumsum(rewards)
+    win_rates = cummulative_rewards/(np.arange(NUM_TRIALS) + 1)
+    plt.figure(figsize = (10,8))
+    plt.plot(win_rates)
+    plt.plot(np.ones(NUM_TRIALS)*np.max(BANDIT_PROBS))
+    plt.ylim(0,1)
+    plt.show()
+    
+if __name__ == "__main__":
+    experiment()
