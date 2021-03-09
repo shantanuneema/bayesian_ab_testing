@@ -22,13 +22,13 @@ class Bandit:
         self.p_estimate = ((self.N - 1)*self.p_estimate + x)/self.N
         
     def experiment():
-        bandits = [p for p in BANDIT_PROBS]
+        bandits = [Bandit(p) for p in BANDIT_PROBS]
         rewards = np.zeros(NUM_TRIALS)
         num_times_explored = 0
         num_times_exploited = 0
         num_optimal = 0
         
-        optimal_j = np.argmax([b for b in bandits])
+        optimal_j = np.argmax([b.p for b in bandits])
         print("optimal_j:", optimal_j)
         
         for i in range(NUM_TRIALS):
@@ -39,13 +39,13 @@ class Bandit:
                 j = bandits.index(np.random.choice(bandits))
             else:
                 num_times_exploited += 1
-                j = np.argmax([b for b in bandits])
+                j = np.argmax([b.p for b in bandits])
                 
             if j == optimal_j:
                 num_optimal += 1
                 
             # pull the arm for the bandit with largest sample
-            x = Bandit(bandits[j]).pull()
+            x = Bandit(bandits[j].p).pull()
             
             # update the rewards log
             rewards[i] = x
